@@ -1,0 +1,8 @@
+U:\501\BlackJack\BlackJack\bin\Release\BlackJack.exe.config
+U:\501\BlackJack\BlackJack\bin\Release\BlackJack.exe
+U:\501\BlackJack\BlackJack\bin\Release\BlackJack.pdb
+U:\501\BlackJack\BlackJack\bin\Release\CardLib.dll
+U:\501\BlackJack\BlackJack\bin\Release\CardLib.pdb
+U:\501\BlackJack\BlackJack\obj\Release\BlackJackGame.csprojResolveAssemblyReference.cache
+U:\501\BlackJack\BlackJack\obj\Release\BlackJack.exe
+U:\501\BlackJack\BlackJack\obj\Release\BlackJack.pdb

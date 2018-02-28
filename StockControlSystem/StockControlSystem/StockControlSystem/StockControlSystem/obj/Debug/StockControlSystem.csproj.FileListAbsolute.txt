@@ -1,0 +1,11 @@
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\bin\Debug\StockControlSystem.exe.config
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\bin\Debug\StockControlSystem.exe
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\bin\Debug\StockControlSystem.pdb
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\obj\Debug\StockControlSystem.csprojResolveAssemblyReference.cache
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\obj\Debug\StockControlSystem.SystemComputer.resources
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\obj\Debug\StockControlSystem.Properties.Resources.resources
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\obj\Debug\StockControlSystem.csproj.GenerateResource.Cache
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\obj\Debug\StockControlSystem.exe
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\obj\Debug\StockControlSystem.pdb
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\obj\Debug\StockControlSystem.Till.resources
+U:\501\Project3\StockControlSystem\StockControlSystem\StockControlSystem\obj\Debug\StockControlSystem.ListDialog.resources

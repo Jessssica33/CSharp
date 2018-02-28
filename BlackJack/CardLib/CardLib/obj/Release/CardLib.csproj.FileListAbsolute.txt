@@ -1,0 +1,5 @@
+U:\501\CardLib\CardLib\bin\Release\CardLib.dll
+U:\501\CardLib\CardLib\bin\Release\CardLib.pdb
+U:\501\CardLib\CardLib\obj\Release\CardLib.dll
+U:\501\CardLib\CardLib\obj\Release\CardLib.pdb
+U:\501\CardLib\CardLib\obj\Release\CardLib.csprojResolveAssemblyReference.cache

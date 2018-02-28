@@ -1,0 +1,64 @@
+  File Format:
+  Suppliers.spl File Format:
+  Key & Name of the supplier & Address of the supplier & Tel number
+ 12 & Formaggi Fortini & Viale Dante, 75 Ravenna  USA & (0544) 60323
+ 24 & Aux joyeux ecclesiastiques &  203, Rue des Francs-Bourgeois Paris France & (1) 03.83.00.68
+ 36 & Mayumi's & 92 Setsuko Chuo-ku Osaka Japan & (06) 431-7877
+ 48 & Lyngbysild & Lyngbysild Fiskebakken 10 Lyngby Denmark & 43844108
+ 60 & New England Seafood Cannery & Order Processing Dept. 2100 Paul Revere Blvd. Boston USA & (617) 555-3267
+  
+  
+  StockItems.sti File Format:
+  Key & Name of item & bar code & price & threshold & number of items & Supplier's key (foreign key)
+  11 & Gorgonzola Telino & 101 & 5.00 & 5 & 7 & 12
+  21 & Mozzarella di Giovanni & 102 & 4.25 & 5 & 6 & 12
+  31 & Mascarpone Fabioli & 103 & 83.00 & 10 & 22 & 12
+  41 & Cote de Blaye & 201 & 32.20 & 5 & 8 & 24
+  51 & Chartreuse verte &  202 & 23.4 & 7 & 12 & 24
+  61 & Konbu & 301 & 5.35 & 10 & 15 & 36
+  71 & Genen Shouyu & 302 & 15.50 & 5 & 6 & 36
+  81 & Rogede sild & 401 & 25.00 & 10 & 11 & 48
+  91 & Spegesild & 402 & 12.89 & 5 & 8 & 48
+  101 & Jack's New England Clam Chowder & 501 & 8.24 & 10 & 13 & 60
+  111 & Boston Crab Meat & 502 & 4.95 & 8 & 20 & 60
+         
+       
+       // Read File Information
+       VISIBILITY_SPEC RETURN_TYPE LoadSuppliers()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Suppliers|*.txt";
+            openFileDialog.InitialDirectory = Application.StartupPath;
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string s;
+                string[] properties = new string[NUMBER_OF_ENTRIES_IN_LINE];  // 4 entries in the suppliers file
+                char[] spliter = { '&' };
+                try 
+                {
+                    using (TextReader trs = new StreamReader(openFileDialog.FileName))
+                    {
+                        while (((s = trs.ReadLine()) != null) && s != "")
+                        {
+                            properties = s.Split(spliter);
+ 			    // you have all 4 strings in properties[]
+ 			    // to extract a string, you may want to do the following
+ 			    // string s = properties[i].trim();
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Exception is caught (LoadSuppliers)");
+                }
+            }
+        }
+                
+        // To show an error dialog box
+        MessageBox.Show("Error Message"); 
+        // Only in the boundary classes
+        
+   
+
+Searching and Deleting
+  To find and delete objects in a list (List<T>), use lambda expressions

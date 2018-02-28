@@ -1,0 +1,14 @@
+U:\501\BlackJack\BlackJack\bin\Debug\BlackJack.exe.config
+U:\501\BlackJack\BlackJack\bin\Debug\BlackJack.exe
+U:\501\BlackJack\BlackJack\bin\Debug\BlackJack.pdb
+U:\501\BlackJack\BlackJack\bin\Debug\CardLib.dll
+U:\501\BlackJack\BlackJack\bin\Debug\CardLib.pdb
+U:\501\BlackJack\BlackJack\obj\Debug\BlackJackGame.csprojResolveAssemblyReference.cache
+U:\501\BlackJack\BlackJack\obj\Debug\BlackJack.exe
+U:\501\BlackJack\BlackJack\obj\Debug\BlackJack.pdb
+U:\501\BJ\BlackJack\BlackJack\bin\Debug\BlackJack.exe.config
+U:\501\BJ\BlackJack\BlackJack\obj\Debug\BlackJack.exe
+U:\501\BJ\BlackJack\BlackJack\obj\Debug\BlackJack.pdb
+U:\501\project1\BlackJack\BlackJack\bin\Debug\BlackJack.exe.config
+U:\501\project1\BlackJack\BlackJack\obj\Debug\BlackJack.exe
+U:\501\project1\BlackJack\BlackJack\obj\Debug\BlackJack.pdb

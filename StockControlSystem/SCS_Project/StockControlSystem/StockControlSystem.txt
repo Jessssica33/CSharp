@@ -1,0 +1,593 @@
+================== Till.cs =============
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using DTS;
+
+namespace StockControlSystem
+{
+    public partial class Till : Form
+    {
+        StockItemManager stockItemManager;
+        List<Transaction> transactionsOfTheDay;
+        Transaction currentTransaction;
+
+        public Till()
+        {
+            InitializeComponent();
+        }
+
+        public Till(StockItemManager stockItemManager)
+            : this()
+        {
+            this.stockItemManager = stockItemManager;
+            transactionsOfTheDay = new List<Transaction>();
+        }
+
+        private void bnScan_Click(object sender, EventArgs e)
+        {
+            string barCode = tbBarCode.Text.Trim();
+            StockItem stockItem;
+            if ((stockItem = stockItemManager.LocateStockItemByBarCode(barCode)) == null)
+            {
+                MessageBox.Show("Item Not Found");
+                tbName.Text = tbPrice.Text = tbBarCode.Text = "";
+                return;
+            }
+            tbName.Text = stockItem.Name;
+            tbPrice.Text = stockItem.Price.ToString();
+            if (currentTransaction == null) 
+                currentTransaction = new Transaction();
+            currentTransaction.AddItem(stockItem);
+            tbBarCode.Text = "";
+        }
+
+        private void bnTotal_Click(object sender, EventArgs e)
+        {
+            if (currentTransaction == null)
+            {
+                MessageBox.Show("No Current Transaction");
+                return;
+            }
+            currentTransaction.UpdateNumStockItems();
+            transactionsOfTheDay.Add(currentTransaction);
+            DisplayCurrentTransaction();
+            currentTransaction = null;
+            tbBarCode.Text = "";
+            tbName.Text = "";
+            tbPrice.Text = "";
+        }
+
+        private void DisplayCurrentTransaction()
+        {
+            ListDialog listDialog = new ListDialog();
+            listDialog.AddDisplayItems(currentTransaction.GetSoldItemsArray());
+            Object[] objectTotal = {"------------------------------",
+                                       "\tTotal = " + currentTransaction.Total};
+            listDialog.AddDisplayItems(objectTotal);
+            listDialog.ShowDialog();
+        }
+
+        private void bnBalance_Click(object sender, EventArgs e)
+        {
+            ListDialog listDialog = new ListDialog();
+            Object[] tmpObjects= new Object[2];
+            decimal totalOfTheDay = 0;
+
+            foreach (Transaction transaction in transactionsOfTheDay)
+            {
+                listDialog.AddDisplayItems(transaction.GetSoldItemsArray());
+                tmpObjects[0] = "------------------------------";
+                tmpObjects[1] = "\tTotal = " + transaction.Total;
+                totalOfTheDay += transaction.Total;
+                listDialog.AddDisplayItems(tmpObjects);
+            }
+            tmpObjects[0] = "================================";
+            tmpObjects[1] = "Totalof the Day = " + totalOfTheDay;
+            listDialog.AddDisplayItems(tmpObjects);
+            listDialog.ShowDialog();
+
+        }
+
+        private void bnClear_Click(object sender, EventArgs e)
+        {
+            transactionsOfTheDay.Clear();
+        }
+
+    }
+}
+
+===================== Computer.cs ==================
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.IO;
+using DTS;
+
+namespace StockControlSystem
+{
+    public partial class Computer : Form
+    {
+        SupplierManager supplierManager;
+        StockItemManager stockItemManager;
+        
+
+        public Computer()
+        {
+            InitializeComponent();
+        }
+
+        private List<Supplier> LoadSuppliers()
+        {
+            List<Supplier> suppliers = new List<Supplier>();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Suppliers|*.spl";
+            openFileDialog.InitialDirectory = Application.StartupPath;
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    TextReader trs = new StreamReader(openFileDialog.FileName);
+                    string s;
+                    string[] properties = new string[4];
+                    char[] spliter = { '&' };
+                    while ((s = trs.ReadLine()) != null)
+                    {
+                        Supplier supplier = new Supplier();
+
+                        properties = s.Split(spliter);
+                        supplier.Key = properties[0].Trim();
+                        supplier.Name = properties[1].Trim();
+                        supplier.Address = properties[2].Trim();
+                        supplier.PhoneNumber = properties[3].Trim();
+                        suppliers.Add(supplier);
+                    }
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Exception is caught (LoadSuppliers)");
+                }
+            }
+            return suppliers;
+        }
+
+        private void showSuppliers()
+        {
+            ListDialog listDialog = new ListDialog();
+            listDialog.AddDisplayItems(supplierManager.GetSuppliersArray());
+            listDialog.ShowDialog();
+        }
+
+        private List<StockItem> LoadStockItems()
+        {
+            List<StockItem> stockItems = new List<StockItem>();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Stock Items|*.sti";
+            openFileDialog.InitialDirectory = Application.StartupPath;
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    TextReader trs = new StreamReader(openFileDialog.FileName);
+                    string s;
+                    string[] properties = new string[7];
+                    char[] spliter = { '&' };
+                    while ((s = trs.ReadLine()) != null)
+                    {
+                        StockItem stockItem = new StockItem();
+
+                        properties = s.Split(spliter);
+                        stockItem.Key = properties[0].Trim();
+                        stockItem.Name = properties[1].Trim();
+                        stockItem.BarCode = properties[2].Trim();
+                        stockItem.Price = decimal.Parse(properties[3].Trim());
+                        stockItem.Threshold = int.Parse(properties[4].Trim());
+                        stockItem.NumItems = int.Parse(properties[5].Trim());
+                        //stockItem.ForeignKey = properties[6].Trim();
+                        stockItem.PreferredSupplier = supplierManager.LocateSupplierByKey(properties[6].Trim());
+                        stockItems.Add(stockItem);
+                    }
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Exception is caught (LoadStockItems)");
+                }
+            }
+            return stockItems;
+        }
+
+        private void showStockItems()
+        {
+            ListDialog listDialog = new ListDialog();
+            listDialog.AddDisplayItems(stockItemManager.GetStockItemsArray());
+            listDialog.ShowDialog();
+            //StockItemSupplierDialogBox stockItemSupplierDialogBox =
+            //    new StockItemSupplierDialogBox(stockItemManager.allStockItems,
+            //        supplierManager.allSuppliers);
+            //stockItemSupplierDialogBox.ShowDialog();
+        }
+
+        private void bnExit_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void bnListStockBelowTH_Click(object sender, EventArgs e)
+        {
+            ListDialog listDialog = new ListDialog();
+            listDialog.AddDisplayItems(stockItemManager.GetScarceStockItemsArray());
+            listDialog.ShowDialog();
+        }
+
+        private void bnListAllStock_Click(object sender, EventArgs e)
+        {
+            showStockItems();
+        }
+
+        private void bnListAllSuppliers_Click(object sender, EventArgs e)
+        {
+            showSuppliers();
+        }
+
+        private void bnOrder_Click(object sender, EventArgs e)
+        {
+            string key = tbOrder.Text.Trim();
+            StockItem stockItem;
+            int numItemsToOrder;
+            if ((stockItem = stockItemManager.LocateStockItemByKey(key)) == null)
+            {
+                MessageBox.Show("Item Not Found");
+                tbOrder.Text = "";
+                return;
+            }
+
+            try
+            {
+                numItemsToOrder = int.Parse(tbNumItemsToOrder.Text.Trim());
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Input an Integer");
+                tbNumItemsToOrder.Text = "";
+                return;
+            }
+            if (numItemsToOrder <= 0)
+            {
+                MessageBox.Show("Input a Positive Integer");
+                tbNumItemsToOrder.Text = "";
+                return;
+            }
+            Order order = new Order(stockItem, numItemsToOrder, DateTime.Now);
+            stockItemManager.AddOrder(order);
+            tbOrder.Text = tbNumItemsToOrder.Text = "";
+        }
+
+        private void bnListOutstandingOrders_Click(object sender, EventArgs e)
+        {
+            ListDialog listDialog = new ListDialog();
+            listDialog.AddDisplayItems(stockItemManager.GetOutstandingOrdersArray());
+            listDialog.ShowDialog();
+        }
+
+        private void bnRestock_Click(object sender, EventArgs e)
+        {
+            string key = tbRestockItemKey.Text.Trim();
+            Order order;
+            if ((order = stockItemManager.LocateOrderByKey(tbRestockItemKey.Text.Trim())) == null)
+            {
+                MessageBox.Show("No Outstanding Order for This Item");
+                return;
+            }
+            stockItemManager.Restock(order);
+            tbRestockItemKey.Text = "";
+        }
+
+        private void bnLoadStock_Click(object sender, EventArgs e)
+        {
+            stockItemManager = new StockItemManager(LoadStockItems());
+            bnListStockBelowTH.Enabled = bnListAllStock.Enabled = bnListAllSuppliers.Enabled = true;
+            bnListOutstandingOrders.Enabled = bnOrder.Enabled = bnRestock.Enabled = true;
+            bnLoadSuppliers.Enabled = bnLoadStock.Enabled = false;
+            Till till = new Till(stockItemManager);
+            till.Show();
+        }
+
+        private void bnLoadSuppliers_Click(object sender, EventArgs e)
+        {
+            supplierManager = new SupplierManager(LoadSuppliers());
+            bnLoadStock.Enabled = true;
+        }
+    }
+}
+
+======================= StockItemManager.cs ===================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace StockControlSystem
+{
+    public class StockItemManager
+    {
+        List<StockItem> allStockItems = new List<StockItem>();
+        List<Order> orders = new List<Order>();
+
+        public StockItemManager(List<StockItem> allItems)
+        {
+            this.allStockItems = allItems;
+        }
+
+        public StockItem LocateStockItemByBarCode(string barCode)
+        {
+            StockItem stockItem = allStockItems.Find(si => (si.BarCode == barCode));
+            return stockItem;
+        }
+
+        public StockItem LocateStockItemByKey(string key)
+        {
+            StockItem stockItem = allStockItems.Find(si => (si.Key == key));
+            return stockItem;
+        }
+
+        public void AddOrder(Order order)
+        {
+            orders.Add(order);
+        }
+
+        public Order LocateOrderByKey(string key)
+        {
+            return orders.Find(o => o.StockItemKey == key);
+        }
+
+        public void Restock(Order order)
+        {
+            order.Restock();
+            orders.Remove(order);
+        }
+
+        public Object[] GetStockItemsArray()
+        {
+            return allStockItems.ToArray();
+        }
+
+        public Object[] GetScarceStockItemsArray()
+        {
+            List<string> scarceStockItemList = new List<string>();
+            foreach (StockItem stockItem in allStockItems)
+            {
+                if (stockItem.IsBelowThreshold())
+                    scarceStockItemList.Add(stockItem.GetSupplierInfo());
+
+            }
+            return scarceStockItemList.ToArray();
+        }
+
+  
+        public Object[] GetOutstandingOrdersArray()
+        {
+            return orders.ToArray();
+        }
+    }
+}
+
+================== SupplierManager.cs ==============
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace StockControlSystem
+{
+    class SupplierManager
+    {
+        public List<Supplier> allSuppliers;
+
+        public SupplierManager(List<Supplier> allSuppliers)
+        {
+            this.allSuppliers = allSuppliers;
+        }
+
+        public Supplier LocateSupplierByKey(string key)
+        {
+            Supplier supplier = allSuppliers.Find(s => (s.Key == key));
+            return supplier;
+        }
+
+        public Object[] GetSuppliersArray()
+        {
+            return allSuppliers.ToArray();
+        }
+    }
+}
+
+================ StockItem.cs ============
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace StockControlSystem
+{
+    public class StockItem
+    {
+        public Supplier PreferredSupplier;
+        public string Key { get; set; }
+        public string Name { get; set; }
+        public string BarCode { get; set; }
+        public decimal Price { get; set; }
+        public int Threshold { get; set; }
+        public int NumItems { get; set; }
+        //public string ForeignKey { get; set; }
+
+        public Boolean IsBelowThreshold()
+        {
+            return (NumItems < Threshold);
+        }
+
+        public string GetSupplierInfo()
+        {
+            return "{" + Key + "} " + Name + ", " + NumItems + "/" + Threshold + ": " + 
+                PreferredSupplier.ToString();
+        }
+
+        public override string ToString()
+        {
+            return "{" + Key + "} " + Name + ", " + BarCode + ", " + Price + ", " + Threshold + ", " + NumItems + "[" + PreferredSupplier + "]"; 
+        }
+
+    }
+}
+
+========================= Supplier.cs ============
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace StockControlSystem
+{
+    public class Supplier
+    {
+        public string Key { get; set; }
+        public string Name { get; set; }
+        public string Address { get; set; }
+        public string PhoneNumber { get; set; }
+
+        public override string ToString()
+        {
+            return Key + ":  " + Name + ",  " + Address + ",  " + PhoneNumber;
+        }
+    }
+}
+
+==================== Order.cs ===============
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace StockControlSystem
+{
+    public class Order
+    {
+        public string StockItemKey
+        {
+            get{return stockItem.Key; }
+        }
+        public DateTime Date { get; set; }
+        public int NumItems { get; set; }
+        private StockItem stockItem;
+
+        public Order(StockItem stockItem, int numItems, DateTime date)
+        {
+            this.stockItem = stockItem;
+            NumItems = numItems;
+            Date = date;
+        }
+
+        public void Restock()
+        {
+            stockItem.NumItems += NumItems;
+        }
+
+        public override string ToString()
+        {
+            return Date + " [" + NumItems + "]: "
+                        + stockItem.GetSupplierInfo();
+        }
+    }
+}
+
+================ Transaction.cs ============
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace StockControlSystem
+{
+    class Transaction
+    {
+        public decimal Total { get; set; }
+        List<SoldItem> soldItems;
+        public Transaction()
+        {
+            soldItems = new List<SoldItem>();
+            Total = (decimal)0;
+        }
+
+        public void AddItem(StockItem stockItem)
+        {
+            SoldItem soldItem = soldItems.Find(si => (si.HasStockItem(stockItem)));
+            if (soldItem == null)
+            {
+                soldItem = new SoldItem(stockItem);
+                soldItems.Add(soldItem);
+                Total += stockItem.Price;
+            }
+            else
+            {
+                soldItem.NumItems++;
+                Total += stockItem.Price;
+            }
+        }
+
+        public void UpdateNumStockItems()
+        {
+               soldItems.ForEach(e => e.UpdateNumStockItems());
+        }
+
+        public Object[] GetSoldItemsArray()
+        {
+            Object[] objects = soldItems.ToArray();
+            return objects;
+        }
+    }
+}
+
+======================= SoldItem.cs =============
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace StockControlSystem
+{
+    class SoldItem
+    {
+        public int NumItems { get; set; }
+        StockItem stockItem;
+
+        public SoldItem(StockItem stockItem)
+        {
+            this.stockItem = stockItem;
+            NumItems = 1;
+        }
+
+        public bool HasStockItem (StockItem stockItem)
+        {
+            return (stockItem == this.stockItem);
+        }
+
+        public void UpdateNumStockItems()
+        {
+            stockItem.NumItems -= NumItems;
+        }
+
+        public override string ToString()
+        {
+            return stockItem.Name + ": " + stockItem.Price + " --- " + NumItems;
+        }
+    }
+}

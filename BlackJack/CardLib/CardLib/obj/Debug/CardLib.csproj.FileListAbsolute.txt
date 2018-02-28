@@ -1,0 +1,5 @@
+U:\501\CardLib\CardLib\bin\Debug\CardLib.dll
+U:\501\CardLib\CardLib\bin\Debug\CardLib.pdb
+U:\501\CardLib\CardLib\obj\Debug\CardLib.csprojResolveAssemblyReference.cache
+U:\501\CardLib\CardLib\obj\Debug\CardLib.dll
+U:\501\CardLib\CardLib\obj\Debug\CardLib.pdb
